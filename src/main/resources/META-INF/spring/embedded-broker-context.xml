@@ -16,7 +16,7 @@
 
 	<!-- Embedded ActiveMQ Broker -->
 	<!-- Default to port 8200, override with embedded-broker.port -->
-	<amq:broker id="broker" useJmx="${embedded-broker.useJmx:false}"
+	<amq:broker id="broker" useJmx="${embedded-broker.useJmx:true}"
 		persistent="${embedded-broker.persistent:true}">
 		<amq:transportConnectors>
 			<amq:transportConnector uri="vm://localhost:${embedded-broker.port:8200}" />
@@ -31,11 +31,11 @@
 			<amq:policyMap>
 				<amq:policyEntries>
 					<amq:policyEntry queue="a.queue.>"
-						producerFlowControl="true" optimizedDispatch="true"
+						producerFlowControl="false" optimizedDispatch="true"
 						storeUsageHighWaterMark="50">
 					</amq:policyEntry>
 					<amq:policyEntry queue=">" producerFlowControl="true"
-						optimizedDispatch="true">
+						optimizedDispatch="false">
 					</amq:policyEntry>
 					<!-- <amq:policyEntry queue="another.queue.>" producerFlowControl="true" 
 						optimizedDispatch="true" storeUsageHighWaterMark="90"> </amq:policyEntry> -->
@@ -65,7 +65,7 @@
 	<!-- ActiveMQ Pooled Connection Factory, wraps around the connection factory. -->
 	<bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory"
 		init-method="start" destroy-method="stop">
-		<property name="maxConnections" value="8" />
+		<property name="maxConnections" value="50" />
 		<property name="connectionFactory" ref="jmsFactory" />
 	</bean>
 
@@ -78,5 +78,23 @@
 	<!-- Internal messaging component, makes use of the JMS Configuration -->
 	<bean id="embedded" class="org.apache.activemq.camel.component.ActiveMQComponent">
 		<property name="configuration" ref="jmsConfig" />
+	</bean>
+	
+	
+	<!-- ActiveMQ Pooled Connection Factory, wraps around the connection factory. -->
+	<bean id="pooledConnectionFactory-from" class="org.apache.activemq.pool.PooledConnectionFactory"
+		init-method="start" destroy-method="stop">
+		<property name="maxConnections" value="50" />
+		<property name="connectionFactory" ref="jmsFactory" />
+	</bean>
+	<!-- The JMS configuration, makes use of the pooled connection factory -->
+	<bean id="jmsConfig-from" class="org.apache.camel.component.jms.JmsConfiguration">
+		<property name="connectionFactory" ref="pooledConnectionFactory-from" />
+		<property name="concurrentConsumers" value="10" />
+	</bean>
+
+	<!-- Internal messaging component, makes use of the JMS Configuration -->
+	<bean id="embedded-from" class="org.apache.activemq.camel.component.ActiveMQComponent">
+		<property name="configuration" ref="jmsConfig-from" />
 	</bean>
 </beans>

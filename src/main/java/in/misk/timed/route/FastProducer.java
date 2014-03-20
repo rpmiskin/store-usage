@@ -21,9 +21,13 @@ public class FastProducer extends SpringRouteBuilder {
 //            .to(retryQueue)
             .stop();
             // Timed route to send the original message
-            from("timer://foo?period=10", retryQueue)
+            from("timer://foo?period=10")
                .setBody().constant(payLoad)
                .to(SlowConsumer.QUEUE);
+            // Timed route to send the original message
+            from("timer://goo?period=10")
+            .setBody().constant(payLoad)
+            .to(SlowConsumer.QUEUE);
     
             //@formatter:on
     }
