@@ -1,5 +1,5 @@
-ActiveMQ FastProduce-SlowConsumer Example
-=========================================
+ActiveMQ FastProducer-SlowConsumer
+==================================
 
 ### Overview
 Example showing how to configure ActiveMQ to deal with Camel
