@@ -29,10 +29,10 @@
 		<amq:destinationPolicy>
 			<amq:policyMap>
 				<amq:policyEntries>
-					<amq:policyEntry queue="a.queue.>" producerFlowControl="false" optimizedDispatch="true"
+					<amq:policyEntry queue="a.queue.>" producerFlowControl="true" optimizedDispatch="true"
 						storeUsageHighWaterMark="50">
 					</amq:policyEntry>
-					<amq:policyEntry queue="another.queue.>" producerFlowControl="false" optimizedDispatch="true"
+					<amq:policyEntry queue="another.queue.>" producerFlowControl="true" optimizedDispatch="true"
 						storeUsageHighWaterMark="90">
 					</amq:policyEntry>
 				</amq:policyEntries>
