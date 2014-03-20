@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Configures an embedded ActiveMQ Broker and a camel messaging component -->
+<!-- Using non-default bean id allows decoupling routes from ActiveMQ -->
+<!-- as the routes can use urls like "embedded:queue-name" -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camel="http://camel.apache.org/schema/spring"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:amq="http://activemq.apache.org/schema/core"
+	xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://activemq.apache.org/schema/core 
+       http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+
+	<!-- Embedded ActiveMQ Broker -->
+	<!-- Default to port 8200, override with embedded-broker.port -->
+	<amq:broker id="broker" useJmx="${embedded-broker.useJmx:false}"
+		persistent="${embedded-broker.persistent:true}">
+		<amq:transportConnectors>
+			<amq:transportConnector uri="vm://localhost:${embedded-broker.port:8200}" />
+		</amq:transportConnectors>
+		<amq:persistenceAdapter>
+			<amq:kahaDB directory="embedded-broker-data" journalMaxFileLength="500"/>
+		</amq:persistenceAdapter>
+
+
+		<amq:destinationPolicy>
+			<amq:policyMap>
+				<amq:policyEntries>
+					<amq:policyEntry queue="a.queue.>" producerFlowControl="false" optimizedDispatch="true"
+						storeUsageHighWaterMark="50">
+					</amq:policyEntry>
+					<amq:policyEntry queue="another.queue.>" producerFlowControl="false" optimizedDispatch="true"
+						storeUsageHighWaterMark="90">
+					</amq:policyEntry>
+				</amq:policyEntries>
+			</amq:policyMap>
+
+		</amq:destinationPolicy>
+		<amq:systemUsage>
+			<amq:systemUsage sendFailIfNoSpace="false">
+				<amq:memoryUsage>
+					<amq:memoryUsage limit="50 mb" />
+				</amq:memoryUsage>
+				<amq:storeUsage>
+					<amq:storeUsage limit="200 mb" />
+				</amq:storeUsage>
+				<amq:tempUsage>
+					<amq:tempUsage limit="100 mb" />
+				</amq:tempUsage>
+			</amq:systemUsage>
+		</amq:systemUsage>
+	</amq:broker>
+
+	<!-- The connection factory, makes use of the embedded ActiveMQ broker. -->
+	<amq:connectionFactory id="jmsFactory"
+		brokerURL="vm://localhost:${embedded-broker.port:8200}" />
+
+	<!-- ActiveMQ Pooled Connection Factory, wraps around the connection factory. -->
+	<bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory"
+		init-method="start" destroy-method="stop">
+		<property name="maxConnections" value="8" />
+		<property name="connectionFactory" ref="jmsFactory" />
+	</bean>
+
+	<!-- The JMS configuration, makes use of the pooled connection factory -->
+	<bean id="jmsConfig" class="org.apache.camel.component.jms.JmsConfiguration">
+		<property name="connectionFactory" ref="pooledConnectionFactory" />
+		<property name="concurrentConsumers" value="10" />
+	</bean>
+
+	<!-- Internal messaging component, makes use of the JMS Configuration -->
+	<bean id="embedded" class="org.apache.activemq.camel.component.ActiveMQComponent">
+		<property name="configuration" ref="jmsConfig" />
+	</bean>
+</beans>
