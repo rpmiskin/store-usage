@@ -23,7 +23,7 @@
 		</amq:transportConnectors>
 		<amq:persistenceAdapter>
 			<amq:kahaDB directory="embedded-broker-data"
-				journalMaxFileLength="10mb" />
+				journalMaxFileLength="256kb" />
 		</amq:persistenceAdapter>
 
 
@@ -31,11 +31,11 @@
 			<amq:policyMap>
 				<amq:policyEntries>
 					<amq:policyEntry queue="a.queue.>"
-						producerFlowControl="false" optimizedDispatch="true"
-						storeUsageHighWaterMark="5">
+						producerFlowControl="true" optimizedDispatch="true"
+						storeUsageHighWaterMark="55">
 					</amq:policyEntry>
 					<amq:policyEntry queue=">" producerFlowControl="true"
-						optimizedDispatch="false">
+						optimizedDispatch="false" storeUsageHighWaterMark="90">
 					</amq:policyEntry>
 					<!-- <amq:policyEntry queue="another.queue.>" producerFlowControl="true" 
 						optimizedDispatch="true" storeUsageHighWaterMark="90"> </amq:policyEntry> -->
